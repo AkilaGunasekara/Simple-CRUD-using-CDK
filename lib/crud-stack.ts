@@ -38,9 +38,20 @@ export class CrudStack extends cdk.Stack {
       },
     });
 
+    const deleteLambda = new lambda.Function(this, 'deleteItem',{
+      code: new lambda.AssetCode('./src'),
+      handler:'delete.handler',
+      runtime:lambda.Runtime.NODEJS_16_X,
+      environment:{
+        TABLE_NAME: dynmoTable.tableName,
+        PRIMARY_KEY:'itemId'
+      }
+    });
+
 
     dynmoTable.grantReadData(getAll);
     dynmoTable.grantReadWriteData(createLambda);
+    dynmoTable.grantFullAccess(deleteLambda);
 
     //apigateway
     const api = new apigateway.RestApi(this,' testApi',{
@@ -53,6 +64,12 @@ export class CrudStack extends cdk.Stack {
     const createApi=rootApi.addResource('create');
     const createApiIntegration=new apigateway.LambdaIntegration(createLambda);
     createApi.addMethod('POST', createApiIntegration);
+
+      // API Gateway Integration for Delete
+
+    const deleteApi=rootApi.addResource('delete');
+    const deleteApiIntegration= new apigateway.LambdaIntegration(deleteLambda);
+    deleteApi.addMethod('DELETE' , deleteApiIntegration);
 
     const plan = api.addUsagePlan('UsagePlan', {
       name:'EASY',

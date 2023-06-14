@@ -5,7 +5,7 @@ const PRIMARY_KEY = process.env.PRIMARY_KEY || '';
 export const handler = async (event: any={}) : Promise <any> => {
 
    const item =typeof event.body == 'object' ? event.body :JSON.parse(event.body);
-   const ID = String.fromCharCode(65 + Math.floor(Math.random()*26));
+   const ID = (Math.random());
    item[PRIMARY_KEY] = ID;
     const params = {
         TableName: TABLE_NAME,
